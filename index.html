@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Asistencia QR - UNH</title>
+
+<style>
+body {
+    margin: 0;
+    font-family: Arial, sans-serif;
+    display: flex;
+    height: 100vh;
+}
+
+/* LADO IZQUIERDO */
+.left {
+    width: 35%;
+    background: #78b8e5;
+    color: #1a1a1a; /* texto más oscuro */
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    padding: 20px;
+    text-align: center;
+}
+
+.left img {
+    width: 120px;
+    margin-bottom: 15px;
+}
+
+.left h1 {
+    font-size: 18px;
+    margin: 5px 0;
+}
+
+.left h2 {
+    font-size: 26px;
+    margin: 10px 0;
+}
+
+.left p {
+    font-size: 14px;
+}
+
+/* LADO DERECHO */
+.right {
+    width: 65%;
+    background: #f5f6fa;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+}
+
+#reader {
+    width: 300px;
+}
+
+.card {
+    background: white;
+    padding: 20px;
+    border-radius: 10px;
+    text-align: center;
+}
+
+.status {
+    margin-top: 10px;
+    color: gray;
+}
+</style>
+
+</head>
+
+<body>
+
+<div class="left">
+    <img src="logo.png">
+    <h1>UNIVERSIDAD NACIONAL DE</h1>
+    <h2>HUANCAVELICA</h2>
+    <h2>CONTROL DE ASISTENCIA</h2>
+    <p>Escanea tu código QR para registrar tu asistencia</p>
+</div>
+
+<div class="right">
+    <div class="card">
+        <h2>Escanear Código QR</h2>
+        <p>Coloca tu código QR frente a la cámara</p>
+
+        <div id="reader"></div>
+
+        <p class="status" id="resultado">Esperando escaneo...</p>
+    </div>
+</div>
+
+<script src="https://unpkg.com/html5-qrcode"></script>
+
+<script>
+function onScanSuccess(decodedText) {
+    document.getElementById("resultado").innerHTML =
+        "⏳ Registrando...";
+
+    // AQUÍ luego conectamos con WordPress
+    console.log(decodedText);
+}
+
+let scanner = new Html5QrcodeScanner("reader", {
+    fps: 10,
+    qrbox: 250
+});
+
+scanner.render(onScanSuccess);
+</script>
+
+</body>
+</html>
