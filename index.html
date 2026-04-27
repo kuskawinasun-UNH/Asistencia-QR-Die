@@ -21,30 +21,19 @@ body {
     flex-direction: column;
     justify-content: center;
     align-items: center;
-    text-align: center; 
-    padding: 20px;
 }
 
 /* LOGOS */
-.logos {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
+.logo-unh {
+    width: 230px;
     animation: fadeZoom 1s ease;
 }
 
-.logo-unh {
-    width: 220px;
-    margin-bottom: 10px;
-}
-
 .logo-secundario {
-    width: 180px;
+    width: 200px;
+    margin-top: 10px;
+    animation: fadeZoom 1.5s ease;
 }
-
-/* TEXTOS */
-.left h1 { font-size: 16px; margin: 5px; }
-.left h2 { font-size: 24px; margin: 5px; }
 
 /* DERECHA */
 .right {
@@ -60,31 +49,15 @@ body {
     background: white;
     padding: 25px;
     border-radius: 12px;
-    width: 320px;
+    width: 350px;
     text-align: center;
     box-shadow: 0 4px 10px rgba(0,0,0,0.1);
     animation: slideUp 1s ease;
 }
 
-/* CAJAS */
-.box {
+/* QR */
+#qr {
     margin-top: 15px;
-    padding: 10px;
-    border-radius: 10px;
-    background: #f8f9fb;
-}
-
-/* SCANNER */
-#reader {
-    width: 100% !important;
-    max-width: 250px;
-    margin: auto;
-}
-
-/* BOTONES DEL SCANNER */
-#reader button, #reader select {
-    font-size: 12px;
-    padding: 4px;
 }
 
 /* INPUT */
@@ -116,88 +89,94 @@ body {
 
 <!-- IZQUIERDA -->
 <div class="left">
-    <div class="logos">
-        <img src="logo-unh.png" class="logo-unh">
-        <img src="logo.png" class="logo-secundario">
-    </div>
-
-    <h1>UNIVERSIDAD NACIONAL DE</h1>
-    <h2>HUANCAVELICA</h2>
-    <h2>CONTROL DE ASISTENCIA</h2>
+    <img src="logo-unh.png" class="logo-unh">
+    <img src="logo.png" class="logo-secundario">
 </div>
 
 <!-- DERECHA -->
 <div class="right">
     <div class="card">
 
-        <h2>Registrar Asistencia</h2>
+        <h2>Control de Asistencia</h2>
 
-        <!-- CÁMARA -->
-        <div class="box">
-            <h3>📷 Cámara</h3>
-            <div id="reader"></div>
-        </div>
+        <!-- MÉTODO 1 -->
+        <p>📷 Escanea este QR con tu celular</p>
+        <div id="qr"></div>
 
-        <!-- IMAGEN -->
-        <div class="box">
-            <h3>🖼️ Subir QR</h3>
-            <input type="file" id="qr-input" accept="image/*">
-        </div>
+        <hr>
+
+        <!-- MÉTODO 2 -->
+        <p>🖼️ O sube tu código QR</p>
+        <input type="file" id="qr-input" accept="image/*">
 
         <p id="resultado">Esperando acción...</p>
 
     </div>
 </div>
 
-<!-- LIBRERÍA -->
+<!-- LIBRERÍA GENERAR QR -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+
+<!-- LIBRERÍA LEER QR -->
 <script src="https://unpkg.com/html5-qrcode"></script>
 
 <script>
 
-const resultado = document.getElementById("resultado");
+// 🔥 CAMBIA TU DOMINIO
+let actividadURL = "https://TU-DOMINIO.com/registro-asistencia/?act=ACT001";
 
-// 🔥 FUNCIÓN PRINCIPAL
-function registrarAsistencia(codigo) {
-    resultado.innerHTML = "Código leído: " + codigo;
-}
-
-// =======================
-// 📷 CÁMARA
-// =======================
-function onScanSuccess(decodedText) {
-    registrarAsistencia(decodedText);
-}
-
-let scanner = new Html5QrcodeScanner("reader", {
-    fps: 10,
-    qrbox: { width: 200, height: 200 }
+// GENERAR QR (pantalla)
+new QRCode(document.getElementById("qr"), {
+    text: actividadURL,
+    width: 250,
+    height: 250
 });
 
-scanner.render(onScanSuccess);
-
+const resultado = document.getElementById("resultado");
 
 // =======================
-// 🖼️ IMAGEN
+// 🖼️ MÉTODO: SUBIR IMAGEN
 // =======================
-const qrInput = document.getElementById("qr-input");
+document.getElementById("qr-input").addEventListener("change", function(e){
 
-qrInput.addEventListener("change", function(e) {
     const file = e.target.files[0];
     if (!file) return;
 
-    scanner.clear(); // 🔥 evita conflicto
-
-    const html5QrCode = new Html5Qrcode("reader");
+    const html5QrCode = new Html5Qrcode("qr");
 
     html5QrCode.scanFile(file, true)
     .then(decodedText => {
-        registrarAsistencia(decodedText);
+
+        resultado.innerHTML = "⏳ Registrando...";
+
+        fetch("https://TU-DOMINIO.com/wp-json/asistencia/v1/guardar", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({
+                id: decodedText,
+                actividad: "ACT001"
+            })
+        })
+        .then(res => res.json())
+        .then(data => {
+            if(data.ok){
+                resultado.style.color = "green";
+                resultado.innerHTML = "✅ " + data.nombre;
+            } else {
+                resultado.style.color = "red";
+                resultado.innerHTML = "❌ " + data.error;
+            }
+        });
+
     })
-    .catch(err => {
+    .catch(() => {
+        resultado.style.color = "red";
         resultado.innerHTML = "❌ No se pudo leer el QR";
     });
-});
 
+});
 </script>
 
 </body>
