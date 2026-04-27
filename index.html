@@ -17,7 +17,7 @@ body {
 .left {
     width: 35%;
     background: #78b8e5;
-    color: #1a1a1a; /* texto más oscuro */
+    color: #1a1a1a;
     display: flex;
     flex-direction: column;
     justify-content: center;
@@ -27,8 +27,9 @@ body {
 }
 
 .left img {
-    width: 120px;
-    margin-bottom: 15px;
+    width: 220px;
+    display: block;
+    margin: 0 auto 20px auto;
 }
 
 .left h1 {
@@ -50,20 +51,21 @@ body {
     width: 65%;
     background: #f5f6fa;
     display: flex;
-    flex-direction: column;
     justify-content: center;
     align-items: center;
 }
 
-#reader {
-    width: 300px;
-}
-
+/* TARJETA QR */
 .card {
     background: white;
-    padding: 20px;
-    border-radius: 10px;
+    padding: 30px;
+    border-radius: 12px;
     text-align: center;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+}
+
+#qr {
+    margin-top: 15px;
 }
 
 .status {
@@ -76,42 +78,40 @@ body {
 
 <body>
 
+<!-- IZQUIERDA -->
 <div class="left">
     <img src="logo.png">
     <h1>UNIVERSIDAD NACIONAL DE</h1>
     <h2>HUANCAVELICA</h2>
     <h2>CONTROL DE ASISTENCIA</h2>
-    <p>Escanea tu código QR para registrar tu asistencia</p>
+    <p>Escanea el código QR para registrar tu asistencia</p>
 </div>
 
+<!-- DERECHA -->
 <div class="right">
     <div class="card">
         <h2>Escanear Código QR</h2>
-        <p>Coloca tu código QR frente a la cámara</p>
+        <p>Muestra este código a los participantes</p>
 
-        <div id="reader"></div>
+        <div id="qr"></div>
 
-        <p class="status" id="resultado">Esperando escaneo...</p>
+        <p class="status">Código activo</p>
     </div>
 </div>
 
-<script src="https://unpkg.com/html5-qrcode"></script>
+<!-- LIBRERÍA QR -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 
 <script>
-function onScanSuccess(decodedText) {
-    document.getElementById("resultado").innerHTML =
-        "⏳ Registrando...";
+// 🔥 CAMBIA ESTE LINK POR TU DOMINIO WORDPRESS
+let codigoActividad = "https://TU-DOMINIO.com/registro-asistencia/?actividad=ACT001";
 
-    // AQUÍ luego conectamos con WordPress
-    console.log(decodedText);
-}
-
-let scanner = new Html5QrcodeScanner("reader", {
-    fps: 10,
-    qrbox: 250
+// Generar QR
+new QRCode(document.getElementById("qr"), {
+    text: codigoActividad,
+    width: 250,
+    height: 250
 });
-
-scanner.render(onScanSuccess);
 </script>
 
 </body>
