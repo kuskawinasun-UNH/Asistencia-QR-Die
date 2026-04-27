@@ -40,9 +40,8 @@ body {
     margin-bottom: 10px;
 }
 
-/* TU LOGO */
 .logo-secundario {
-    width: 250px;
+    width: 180px;
 }
 
 /* TEXTOS */
@@ -86,6 +85,50 @@ body {
 .status {
     margin-top: 10px;
     color: gray;
+}
+    /* ANIMACIÓN LOGOS */
+.logo-unh {
+    width: 200px;
+    margin-bottom: 10px;
+    animation: fadeZoom 1s ease forwards;
+}
+
+.logo-secundario {
+    width: 180px;
+    animation: fadeZoom 1.5s ease forwards;
+}
+
+/* TARJETA QR */
+.card {
+    background: white;
+    padding: 30px;
+    border-radius: 12px;
+    text-align: center;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+    animation: slideUp 1s ease forwards;
+}
+
+/* EFECTOS */
+@keyframes fadeZoom {
+    from {
+        opacity: 0;
+        transform: scale(0.8);
+    }
+    to {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+@keyframes slideUp {
+    from {
+        opacity: 0;
+        transform: translateY(40px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
 }
 </style>
 
