@@ -6,6 +6,21 @@
 <title>Asistencia QR - UNH</title>
 
 <style>
+    .logos {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+.logo-unh {
+    width: 180px; /* grande */
+    margin-bottom: 10px;
+}
+
+.logo-secundario {
+    width: 140px; /* más pequeño */
+}
 body {
     margin: 0;
     font-family: Arial, sans-serif;
@@ -79,8 +94,9 @@ body {
 <body>
 
 <!-- IZQUIERDA -->
-<div class="left">
-    <img src="logo.png">
+<div class="logos">
+    <img src="logo-unh.png" class="logo-unh">
+    <img src="logo.png" class="logo-secundario">
     <h1>UNIVERSIDAD NACIONAL DE</h1>
     <h2>HUANCAVELICA</h2>
     <h2>CONTROL DE ASISTENCIA</h2>
