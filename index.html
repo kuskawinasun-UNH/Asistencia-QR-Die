@@ -6,39 +6,6 @@
 <title>Asistencia QR - UNH</title>
 
 <style>
-    /* CONTENEDORES */
-.box {
-    margin-top: 15px;
-    padding: 10px;
-    border-radius: 10px;
-    background: #f8f9fb;
-}
-
-/* LECTOR QR */
-#reader {
-    width: 100% !important;
-    max-width: 280px;
-    margin: auto;
-}
-
-/* OCULTAR ELEMENTOS FEOS DEL SCANNER */
-#reader button,
-#reader select {
-    margin-top: 5px;
-    padding: 5px;
-    font-size: 12px;
-}
-
-/* INPUT FILE */
-#qr-input {
-    margin-top: 10px;
-}
-
-/* RESULTADO */
-#resultado {
-    margin-top: 15px;
-    font-weight: bold;
-}
 body {
     margin: 0;
     font-family: Arial, sans-serif;
@@ -46,30 +13,28 @@ body {
     height: 100vh;
 }
 
-/* LADO IZQUIERDO */
+/* IZQUIERDA */
 .left {
     width: 35%;
     background: #78b8e5;
-    color: #1a1a1a;
     display: flex;
     flex-direction: column;
     justify-content: center;
     align-items: center;
+    text-align: center; 
     padding: 20px;
-    text-align: center;
 }
 
-/* CONTENEDOR LOGOS */
+/* LOGOS */
 .logos {
     display: flex;
     flex-direction: column;
     align-items: center;
-    margin-bottom: 20px;
+    animation: fadeZoom 1s ease;
 }
 
-/* LOGO UNH (GRANDE) */
 .logo-unh {
-    width: 200px;
+    width: 220px;
     margin-bottom: 10px;
 }
 
@@ -78,21 +43,10 @@ body {
 }
 
 /* TEXTOS */
-.left h1 {
-    font-size: 16px;
-    margin: 5px 0;
-}
+.left h1 { font-size: 16px; margin: 5px; }
+.left h2 { font-size: 24px; margin: 5px; }
 
-.left h2 {
-    font-size: 24px;
-    margin: 8px 0;
-}
-
-.left p {
-    font-size: 14px;
-}
-
-/* LADO DERECHO */
+/* DERECHA */
 .right {
     width: 65%;
     background: #f5f6fa;
@@ -104,64 +58,55 @@ body {
 /* TARJETA */
 .card {
     background: white;
-    padding: 30px;
+    padding: 25px;
     border-radius: 12px;
+    width: 320px;
     text-align: center;
     box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+    animation: slideUp 1s ease;
 }
 
-/* QR */
-#qr {
+/* CAJAS */
+.box {
     margin-top: 15px;
+    padding: 10px;
+    border-radius: 10px;
+    background: #f8f9fb;
 }
 
-.status {
+/* SCANNER */
+#reader {
+    width: 100% !important;
+    max-width: 250px;
+    margin: auto;
+}
+
+/* BOTONES DEL SCANNER */
+#reader button, #reader select {
+    font-size: 12px;
+    padding: 4px;
+}
+
+/* INPUT */
+#qr-input {
     margin-top: 10px;
-    color: gray;
-}
-    /* ANIMACIÓN LOGOS */
-.logo-unh {
-    width: 200px;
-    margin-bottom: 10px;
-    animation: fadeZoom 1s ease forwards;
 }
 
-.logo-secundario {
-    width: 180px;
-    animation: fadeZoom 1.5s ease forwards;
+/* RESULTADO */
+#resultado {
+    margin-top: 15px;
+    font-weight: bold;
 }
 
-/* TARJETA QR */
-.card {
-    background: white;
-    padding: 30px;
-    border-radius: 12px;
-    text-align: center;
-    box-shadow: 0 4px 10px rgba(0,0,0,0.1);
-    animation: slideUp 1s ease forwards;
-}
-
-/* EFECTOS */
+/* ANIMACIONES */
 @keyframes fadeZoom {
-    from {
-        opacity: 0;
-        transform: scale(0.8);
-    }
-    to {
-        opacity: 1;
-        transform: scale(1);
-    }
+    from {opacity:0; transform:scale(0.8);}
+    to {opacity:1; transform:scale(1);}
 }
 
 @keyframes slideUp {
-    from {
-        opacity: 0;
-        transform: translateY(40px);
-    }
-    to {
-        opacity: 1;
-        transform: translateY(0);
-    }
+    from {opacity:0; transform:translateY(40px);}
+    to {opacity:1; transform:translateY(0);}
 }
 </style>
 
@@ -171,7 +116,6 @@ body {
 
 <!-- IZQUIERDA -->
 <div class="left">
-
     <div class="logos">
         <img src="logo-unh.png" class="logo-unh">
         <img src="logo.png" class="logo-secundario">
@@ -180,50 +124,41 @@ body {
     <h1>UNIVERSIDAD NACIONAL DE</h1>
     <h2>HUANCAVELICA</h2>
     <h2>CONTROL DE ASISTENCIA</h2>
-    <p>Escanea el código QR para registrar tu asistencia</p>
-
 </div>
 
 <!-- DERECHA -->
-<div class="card">
+<div class="right">
+    <div class="card">
 
-    <h2>Registrar Asistencia</h2>
+        <h2>Registrar Asistencia</h2>
 
-    <!-- CONTENEDOR CÁMARA -->
-    <div class="box">
-        <h3>📷 Escanear con cámara</h3>
-        <div id="reader"></div>
+        <!-- CÁMARA -->
+        <div class="box">
+            <h3>📷 Cámara</h3>
+            <div id="reader"></div>
+        </div>
+
+        <!-- IMAGEN -->
+        <div class="box">
+            <h3>🖼️ Subir QR</h3>
+            <input type="file" id="qr-input" accept="image/*">
+        </div>
+
+        <p id="resultado">Esperando acción...</p>
+
     </div>
-
-    <!-- CONTENEDOR SUBIDA -->
-    <div class="box">
-        <h3>🖼️ Subir QR desde galería</h3>
-        <input type="file" id="qr-input" accept="image/*">
-    </div>
-
-    <p id="resultado">Esperando acción...</p>
-
 </div>
 
-<!-- LIBRERÍA QR -->
-<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<!-- LIBRERÍA -->
+<script src="https://unpkg.com/html5-qrcode"></script>
 
 <script>
-// 🔥 CAMBIA ESTO POR TU DOMINIO WORDPRESS
-let codigoActividad = "https://TU-DOMINIO.com/registro-asistencia/?actividad=ACT001";
 
-// GENERAR QR
-new QRCode(document.getElementById("qr"), {
-    text: codigoActividad,
-    width: 250,
-    height: 250
-});
-</script>
-<script>
+const resultado = document.getElementById("resultado");
 
 // 🔥 FUNCIÓN PRINCIPAL
 function registrarAsistencia(codigo) {
-    console.log("Código:", codigo);
+    resultado.innerHTML = "Código leído: " + codigo;
 }
 
 // =======================
@@ -242,17 +177,15 @@ scanner.render(onScanSuccess);
 
 
 // =======================
-// 🖼️ IMAGEN (AQUÍ VA LO NUEVO)
+// 🖼️ IMAGEN
 // =======================
-
 const qrInput = document.getElementById("qr-input");
-const resultado = document.getElementById("resultado");
 
 qrInput.addEventListener("change", function(e) {
     const file = e.target.files[0];
     if (!file) return;
 
-    scanner.clear(); // 🔥 importante
+    scanner.clear(); // 🔥 evita conflicto
 
     const html5QrCode = new Html5Qrcode("reader");
 
@@ -266,5 +199,6 @@ qrInput.addEventListener("change", function(e) {
 });
 
 </script>
+
 </body>
 </html>
