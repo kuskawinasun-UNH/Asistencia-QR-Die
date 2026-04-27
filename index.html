@@ -6,21 +6,6 @@
 <title>Asistencia QR - UNH</title>
 
 <style>
-    .logos {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    margin-bottom: 20px;
-}
-
-.logo-unh {
-    width: 180px; /* grande */
-    margin-bottom: 10px;
-}
-
-.logo-secundario {
-    width: 140px; /* más pequeño */
-}
 body {
     margin: 0;
     font-family: Arial, sans-serif;
@@ -41,20 +26,34 @@ body {
     text-align: center;
 }
 
-.left img {
-    width: 220px;
-    display: block;
-    margin: 0 auto 20px auto;
+/* CONTENEDOR LOGOS */
+.logos {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin-bottom: 20px;
 }
 
+/* LOGO UNH (GRANDE) */
+.logo-unh {
+    width: 200px;
+    margin-bottom: 10px;
+}
+
+/* TU LOGO */
+.logo-secundario {
+    width: 140px;
+}
+
+/* TEXTOS */
 .left h1 {
-    font-size: 18px;
+    font-size: 16px;
     margin: 5px 0;
 }
 
 .left h2 {
-    font-size: 26px;
-    margin: 10px 0;
+    font-size: 24px;
+    margin: 8px 0;
 }
 
 .left p {
@@ -70,7 +69,7 @@ body {
     align-items: center;
 }
 
-/* TARJETA QR */
+/* TARJETA */
 .card {
     background: white;
     padding: 30px;
@@ -79,6 +78,7 @@ body {
     box-shadow: 0 4px 10px rgba(0,0,0,0.1);
 }
 
+/* QR */
 #qr {
     margin-top: 15px;
 }
@@ -94,13 +94,18 @@ body {
 <body>
 
 <!-- IZQUIERDA -->
-<div class="logos">
-    <img src="logo-unh.png" class="logo-unh">
-    <img src="logo.png" class="logo-secundario">
+<div class="left">
+
+    <div class="logos">
+        <img src="logo-unh.png" class="logo-unh">
+        <img src="logo.png" class="logo-secundario">
+    </div>
+
     <h1>UNIVERSIDAD NACIONAL DE</h1>
     <h2>HUANCAVELICA</h2>
     <h2>CONTROL DE ASISTENCIA</h2>
     <p>Escanea el código QR para registrar tu asistencia</p>
+
 </div>
 
 <!-- DERECHA -->
@@ -119,10 +124,10 @@ body {
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 
 <script>
-// 🔥 CAMBIA ESTE LINK POR TU DOMINIO WORDPRESS
+// 🔥 CAMBIA ESTO POR TU DOMINIO WORDPRESS
 let codigoActividad = "https://TU-DOMINIO.com/registro-asistencia/?actividad=ACT001";
 
-// Generar QR
+// GENERAR QR
 new QRCode(document.getElementById("qr"), {
     text: codigoActividad,
     width: 250,
