@@ -17,22 +17,41 @@ body {
 .left {
     width: 35%;
     background: #78b8e5;
+    color: #1a1a1a;
     display: flex;
     flex-direction: column;
     justify-content: center;
     align-items: center;
+    text-align: center;
+    padding: 20px;
 }
 
 /* LOGOS */
 .logo-unh {
     width: 230px;
+    margin-bottom: 10px;
     animation: fadeZoom 1s ease;
 }
 
 .logo-secundario {
     width: 200px;
-    margin-top: 10px;
+    margin-bottom: 15px;
     animation: fadeZoom 1.5s ease;
+}
+
+/* TEXTOS */
+.left h1 {
+    font-size: 16px;
+    margin: 5px 0;
+}
+
+.left h2 {
+    font-size: 24px;
+    margin: 6px 0;
+}
+
+.left p {
+    font-size: 14px;
 }
 
 /* DERECHA */
@@ -49,7 +68,7 @@ body {
     background: white;
     padding: 25px;
     border-radius: 12px;
-    width: 350px;
+    width: 360px;
     text-align: center;
     box-shadow: 0 4px 10px rgba(0,0,0,0.1);
     animation: slideUp 1s ease;
@@ -69,6 +88,7 @@ body {
 #resultado {
     margin-top: 15px;
     font-weight: bold;
+    font-size: 15px;
 }
 
 /* ANIMACIONES */
@@ -91,13 +111,18 @@ body {
 <div class="left">
     <img src="logo-unh.png" class="logo-unh">
     <img src="logo.png" class="logo-secundario">
+
+    <h1>UNIVERSIDAD NACIONAL DE</h1>
+    <h2>HUANCAVELICA</h2>
+    <h2>CONTROL DE ASISTENCIA</h2>
+    <p>Escanea el código QR para registrar tu asistencia</p>
 </div>
 
 <!-- DERECHA -->
 <div class="right">
     <div class="card">
 
-        <h2>Control de Asistencia</h2>
+        <h2>Registro de Asistencia</h2>
 
         <!-- MÉTODO 1 -->
         <p>📷 Escanea este QR con tu celular</p>
@@ -125,7 +150,7 @@ body {
 // 🔥 CAMBIA TU DOMINIO
 let actividadURL = "https://TU-DOMINIO.com/registro-asistencia/?act=ACT001";
 
-// GENERAR QR (pantalla)
+// GENERAR QR
 new QRCode(document.getElementById("qr"), {
     text: actividadURL,
     width: 250,
@@ -135,7 +160,7 @@ new QRCode(document.getElementById("qr"), {
 const resultado = document.getElementById("resultado");
 
 // =======================
-// 🖼️ MÉTODO: SUBIR IMAGEN
+// 🖼️ SUBIR IMAGEN QR
 // =======================
 document.getElementById("qr-input").addEventListener("change", function(e){
 
@@ -147,7 +172,8 @@ document.getElementById("qr-input").addEventListener("change", function(e){
     html5QrCode.scanFile(file, true)
     .then(decodedText => {
 
-        resultado.innerHTML = "⏳ Registrando...";
+        resultado.style.color = "black";
+        resultado.innerHTML = "⏳ Registrando asistencia...";
 
         fetch("https://TU-DOMINIO.com/wp-json/asistencia/v1/guardar", {
             method: "POST",
@@ -163,7 +189,11 @@ document.getElementById("qr-input").addEventListener("change", function(e){
         .then(data => {
             if(data.ok){
                 resultado.style.color = "green";
-                resultado.innerHTML = "✅ " + data.nombre;
+                resultado.innerHTML = `
+                    ✅ Asistencia registrada<br>
+                    👤 ${data.nombre}<br>
+                    📘 ${data.actividad}
+                `;
             } else {
                 resultado.style.color = "red";
                 resultado.innerHTML = "❌ " + data.error;
