@@ -6,6 +6,39 @@
 <title>Asistencia QR - UNH</title>
 
 <style>
+    /* CONTENEDORES */
+.box {
+    margin-top: 15px;
+    padding: 10px;
+    border-radius: 10px;
+    background: #f8f9fb;
+}
+
+/* LECTOR QR */
+#reader {
+    width: 100% !important;
+    max-width: 280px;
+    margin: auto;
+}
+
+/* OCULTAR ELEMENTOS FEOS DEL SCANNER */
+#reader button,
+#reader select {
+    margin-top: 5px;
+    padding: 5px;
+    font-size: 12px;
+}
+
+/* INPUT FILE */
+#qr-input {
+    margin-top: 10px;
+}
+
+/* RESULTADO */
+#resultado {
+    margin-top: 15px;
+    font-weight: bold;
+}
 body {
     margin: 0;
     font-family: Arial, sans-serif;
@@ -156,15 +189,17 @@ body {
 
     <h2>Registrar Asistencia</h2>
 
-    <!-- MÉTODO 1: CÁMARA -->
-    <h3>📷 Escanear con cámara</h3>
-    <div id="reader" style="width:300px;"></div>
+    <!-- CONTENEDOR CÁMARA -->
+    <div class="box">
+        <h3>📷 Escanear con cámara</h3>
+        <div id="reader"></div>
+    </div>
 
-    <hr style="margin:20px 0;">
-
-    <!-- MÉTODO 2: SUBIR IMAGEN -->
-    <h3>🖼️ Subir QR desde galería</h3>
-    <input type="file" id="qr-input" accept="image/*">
+    <!-- CONTENEDOR SUBIDA -->
+    <div class="box">
+        <h3>🖼️ Subir QR desde galería</h3>
+        <input type="file" id="qr-input" accept="image/*">
+    </div>
 
     <p id="resultado">Esperando acción...</p>
 
@@ -184,6 +219,52 @@ new QRCode(document.getElementById("qr"), {
     height: 250
 });
 </script>
+<script>
 
+// 🔥 FUNCIÓN PRINCIPAL
+function registrarAsistencia(codigo) {
+    console.log("Código:", codigo);
+}
+
+// =======================
+// 📷 CÁMARA
+// =======================
+function onScanSuccess(decodedText) {
+    registrarAsistencia(decodedText);
+}
+
+let scanner = new Html5QrcodeScanner("reader", {
+    fps: 10,
+    qrbox: { width: 200, height: 200 }
+});
+
+scanner.render(onScanSuccess);
+
+
+// =======================
+// 🖼️ IMAGEN (AQUÍ VA LO NUEVO)
+// =======================
+
+const qrInput = document.getElementById("qr-input");
+const resultado = document.getElementById("resultado");
+
+qrInput.addEventListener("change", function(e) {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    scanner.clear(); // 🔥 importante
+
+    const html5QrCode = new Html5Qrcode("reader");
+
+    html5QrCode.scanFile(file, true)
+    .then(decodedText => {
+        registrarAsistencia(decodedText);
+    })
+    .catch(err => {
+        resultado.innerHTML = "❌ No se pudo leer el QR";
+    });
+});
+
+</script>
 </body>
 </html>
