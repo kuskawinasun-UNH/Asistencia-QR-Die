@@ -152,15 +152,22 @@ body {
 </div>
 
 <!-- DERECHA -->
-<div class="right">
-    <div class="card">
-        <h2>Escanear Código QR</h2>
-        <p>Muestra este código a los participantes</p>
+<div class="card">
 
-        <div id="qr"></div>
+    <h2>Registrar Asistencia</h2>
 
-        <p class="status">Código activo</p>
-    </div>
+    <!-- MÉTODO 1: CÁMARA -->
+    <h3>📷 Escanear con cámara</h3>
+    <div id="reader" style="width:300px;"></div>
+
+    <hr style="margin:20px 0;">
+
+    <!-- MÉTODO 2: SUBIR IMAGEN -->
+    <h3>🖼️ Subir QR desde galería</h3>
+    <input type="file" id="qr-input" accept="image/*">
+
+    <p id="resultado">Esperando acción...</p>
+
 </div>
 
 <!-- LIBRERÍA QR -->
