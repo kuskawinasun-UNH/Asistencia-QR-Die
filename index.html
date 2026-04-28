@@ -3,36 +3,46 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Control de Asistencia QR</title>
+
+<title>Asistencia QR</title>
 
 <script src="https://unpkg.com/html5-qrcode"></script>
 
 <style>
-/* 🔥 TU DISEÑO ORIGINAL COMPLETO (NO SE MODIFICÓ) */
 body{
-font-family:Arial;
-background:linear-gradient(135deg,#667eea,#764ba2);
 margin:0;
-padding:10px;
+font-family:Arial;
+background:#f5f5f5;
 }
-.container{
-max-width:500px;
-margin:auto;
-background:#fff;
-border-radius:12px;
-padding:20px;
-}
+
 .header{
-background:#4CAF50;
-color:#fff;
-padding:20px;
-text-align:center;
-border-radius:10px;
+background:#78b8e5;
+color:white;
+padding:15px;
+display:flex;
+align-items:center;
+justify-content:space-between;
 }
+
+.header img{
+height:50px;
+}
+
+.container{
+max-width:420px;
+margin:auto;
+background:white;
+margin-top:20px;
+padding:20px;
+border-radius:12px;
+box-shadow:0 4px 15px rgba(0,0,0,0.2);
+}
+
 #reader{
 width:100%;
 margin:15px 0;
 }
+
 input,select,button{
 width:100%;
 padding:12px;
@@ -40,19 +50,22 @@ margin-top:10px;
 border-radius:8px;
 border:1px solid #ccc;
 }
+
 button{
-background:#4CAF50;
-color:#fff;
+background:#78b8e5;
+color:white;
 border:none;
-cursor:pointer;
+font-weight:bold;
 }
+
 #employee-info{
 display:none;
-background:#f1f1f1;
+background:#eef6fb;
 padding:10px;
 margin-top:10px;
 border-radius:8px;
 }
+
 #respuesta{
 display:none;
 margin-top:15px;
@@ -60,23 +73,36 @@ padding:10px;
 border-radius:8px;
 text-align:center;
 }
+
 .success{background:#d4edda;color:#155724;}
 .error{background:#f8d7da;color:#721c24;}
+
+.toggle{
+margin-top:10px;
+text-align:center;
+}
 </style>
 </head>
 
 <body>
 
+<div class="header">
+<img src="logo-unh.png">
+<h3>SISTEMA DE CONTROL DE REGISTRO</h3>
+<img src="logo.png">
+</div>
+
 <div class="container">
 
-<div class="header">
-<h2>🕐 QASO SYSTEM</h2>
-<p>Escanea o ingresa tu ID</p>
+<div class="toggle">
+<label>
+<input type="checkbox" id="toggleCam" checked> Cámara activa
+</label>
 </div>
 
 <div id="reader"></div>
 
-<input type="text" id="id" placeholder="ID del empleado">
+<input type="text" id="id" placeholder="ID">
 
 <div id="employee-info">
 <p><b>Nombre:</b> <span id="nombre"></span></p>
@@ -97,110 +123,105 @@ text-align:center;
 
 <script>
 
-const API_URL = "https://script.google.com/macros/s/AKfycbxaCInZHVKDP9k2xZFJQAwS33Xd9tWzDUgokiekMAcoT-6Wc7uIYp0KmHEteLtlE7RilQ/exec";
+const API_URL="https://script.google.com/macros/s/AKfycbxaCInZHVKDP9k2xZFJQAwS33Xd9tWzDUgokiekMAcoT-6Wc7uIYp0KmHEteLtlE7RilQ/exec";
 
-let employeeData = null;
+let employeeData=null;
+let scanner=null;
+let camActiva=true;
 
-// 🚀 INICIAR QR
+// QR
 function iniciarQR(){
-const html5QrCode = new Html5Qrcode("reader");
+if(!camActiva) return;
+
+scanner=new Html5Qrcode("reader");
 
 Html5Qrcode.getCameras().then(devices=>{
 if(devices.length){
-html5QrCode.start(
-devices[0].id,
-{fps:10,qrbox:250},
-(qr)=>{
+scanner.start(devices[0].id,{fps:10,qrbox:250},qr=>{
 document.getElementById("id").value=qr;
-buscarEmpleado(qr);
-}
-);
+buscar(qr);
+});
 }
 });
 }
 
-// 🔍 BUSCAR
-function buscarEmpleado(id){
+function detenerQR(){
+if(scanner){
+scanner.stop();
+}
+}
 
+// Toggle cámara
+document.getElementById("toggleCam").addEventListener("change",function(){
+camActiva=this.checked;
+if(camActiva){
+iniciarQR();
+}else{
+detenerQR();
+document.getElementById("reader").innerHTML="";
+}
+});
+
+// Buscar
+function buscar(id){
 fetch(API_URL,{
 method:"POST",
-body:JSON.stringify({
-id:id,
-estado:"CONSULTA"
+body:JSON.stringify({id:id,estado:"CONSULTA"})
 })
-})
-.then(res=>res.json())
-.then(data=>{
-
-if(data.exito){
-employeeData=data;
-
+.then(r=>r.json())
+.then(d=>{
+if(d.exito){
+employeeData=d;
 document.getElementById("employee-info").style.display="block";
-document.getElementById("nombre").textContent=data.nombre;
-document.getElementById("area").textContent=data.area;
-document.getElementById("cargo").textContent=data.cargo;
-
+nombre.textContent=d.nombre;
+area.textContent=d.area;
+cargo.textContent=d.cargo;
 }else{
-mostrar("❌ No encontrado","error");
-document.getElementById("employee-info").style.display="none";
+mostrar("No encontrado","error");
 }
-
 });
-
 }
 
-// 📝 REGISTRAR
+// Registrar
 function registrar(){
-
-const id=document.getElementById("id").value;
-const estado=document.getElementById("estado").value;
-
 if(!employeeData){
-mostrar("❌ Busca primero el empleado","error");
+mostrar("Busca primero","error");
 return;
 }
 
 fetch(API_URL,{
 method:"POST",
 body:JSON.stringify({
-id:id,
-estado:estado
+id:document.getElementById("id").value,
+estado:document.getElementById("estado").value
 })
 })
-.then(res=>res.json())
-.then(data=>{
-
-if(data.exito){
-mostrar(`✅ ${data.nombre} registrado ${data.hora}`,"success");
-
-document.getElementById("id").value="";
-document.getElementById("employee-info").style.display="none";
+.then(r=>r.json())
+.then(d=>{
+if(d.exito){
+mostrar(`✅ ${d.nombre} - ${d.hora}`,"success");
 employeeData=null;
-
+document.getElementById("employee-info").style.display="none";
+document.getElementById("id").value="";
 }else{
-mostrar(data.mensaje,"error");
+mostrar(d.mensaje,"error");
 }
-
 });
-
 }
 
-// 📢 MENSAJE
+// Mensajes
 function mostrar(msg,tipo){
-const div=document.getElementById("respuesta");
+let div=document.getElementById("respuesta");
 div.innerText=msg;
 div.className=tipo;
 div.style.display="block";
 }
 
-// AUTO BUSCAR
+// Auto buscar
 document.getElementById("id").addEventListener("input",function(){
-if(this.value.length>2){
-buscarEmpleado(this.value);
-}
+if(this.value.length>2) buscar(this.value);
 });
 
-// INICIAR
 iniciarQR();
 
 </script>
