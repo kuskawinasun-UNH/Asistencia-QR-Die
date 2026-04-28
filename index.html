@@ -77,15 +77,14 @@ text-align:center;
 
 <div class="header">
 <img src="logo.png">
-<h3>QASO SYSTEM</h3>
+<h3>REGISTRO DE ASISTENCIA UNH</h3>
 <img src="logo-unh.png">
 </div>
 
 <div class="container">
 
-<label>
-<input type="checkbox" id="toggleCam" checked> Cámara activa
-</label>
+<button onclick="iniciarQR()">📷 Activar Cámara</button>
+<button onclick="detenerQR()">⛔ Detener Cámara</button>
 
 <div id="reader"></div>
 
@@ -104,7 +103,7 @@ text-align:center;
 <option value="SALIDA">SALIDA</option>
 </select>
 
-<button id="btnRegistrar" onclick="registrar()">Registrar</button>
+<button onclick="registrar()">Registrar</button>
 
 <div id="respuesta"></div>
 
@@ -112,43 +111,49 @@ text-align:center;
 
 <script>
 
-const API_URL="https://script.google.com/macros/s/AKfycbxaCInZHVKDP9k2xZFJQAwS33Xd9tWzDUgokiekMAcoT-6Wc7uIYp0KmHEteLtlE7RilQ/exec";
+const API_URL = "https://script.google.com/macros/s/AKfycbxaCInZHVKDP9k2xZFJQAwS33Xd9tWzDUgokiekMAcoT-6Wc7uIYp0KmHEteLtlE7RilQ/exec";
 
-let employeeData=null;
-let scanner=null;
-let yaRegistrado=false;
+let employeeData = null;
+let scanner = null;
 
-// QR
+// ACTIVAR CAMARA
 function iniciarQR(){
-scanner=new Html5Qrcode("reader");
+scanner = new Html5Qrcode("reader");
+
 Html5Qrcode.getCameras().then(devices=>{
 if(devices.length){
-scanner.start(devices[0].id,{fps:10,qrbox:250},qr=>{
-idInput.value=qr;
+scanner.start(
+devices[0].id,
+{fps:10,qrbox:250},
+(qr)=>{
+document.getElementById("idInput").value = qr;
 buscar(qr);
-});
 }
-});
+);
+}
+}).catch(()=>mostrar("No se pudo activar cámara","error"));
 }
 
+// DETENER
 function detenerQR(){
-if(scanner) scanner.stop().catch(()=>{});
-}
-
-toggleCam.addEventListener("change",function(){
-this.checked ? iniciarQR() : detenerQR();
+if(scanner){
+scanner.stop().then(()=>{
+document.getElementById("reader").innerHTML="";
 });
+}
+}
 
 // BUSCAR
 function buscarManual(){
-const id=idInput.value.trim();
-if(!id) return mostrar("Ingrese ID","error");
+const id = document.getElementById("idInput").value.trim();
+if(!id){
+mostrar("Ingrese ID","error");
+return;
+}
 buscar(id);
 }
 
 function buscar(id){
-yaRegistrado=false;
-
 fetch(API_URL,{
 method:"POST",
 body:JSON.stringify({id:id,estado:"CONSULTA"})
@@ -156,11 +161,11 @@ body:JSON.stringify({id:id,estado:"CONSULTA"})
 .then(r=>r.json())
 .then(d=>{
 if(d.exito){
-employeeData=d;
-employee-info.style.display="block";
-nombre.textContent=d.nombre;
-area.textContent=d.area;
-cargo.textContent=d.cargo;
+employeeData = d;
+document.getElementById("employee-info").style.display="block";
+nombre.textContent = d.nombre;
+area.textContent = d.area;
+cargo.textContent = d.cargo;
 }else{
 mostrar(d.mensaje,"error");
 }
@@ -169,31 +174,25 @@ mostrar(d.mensaje,"error");
 
 // REGISTRAR
 function registrar(){
-
-if(yaRegistrado){
-mostrar("⚠️ Ya registraste este ID","error");
-return;
-}
-
 if(!employeeData){
-mostrar("Busca primero","error");
+mostrar("Primero busca empleado","error");
 return;
 }
 
 fetch(API_URL,{
 method:"POST",
 body:JSON.stringify({
-id:idInput.value,
-estado:estado.value
+id:document.getElementById("idInput").value,
+estado:document.getElementById("estado").value
 })
 })
 .then(r=>r.json())
 .then(d=>{
 if(d.exito){
 mostrar(`✅ ${d.nombre} - ${d.hora}`,"success");
-
-yaRegistrado=true; // 🔒 BLOQUEO FRONT
-
+employeeData=null;
+document.getElementById("employee-info").style.display="none";
+document.getElementById("idInput").value="";
 }else{
 mostrar(d.mensaje,"error");
 }
@@ -202,12 +201,11 @@ mostrar(d.mensaje,"error");
 
 // MENSAJE
 function mostrar(msg,tipo){
-respuesta.innerText=msg;
-respuesta.className=tipo;
-respuesta.style.display="block";
+const div = document.getElementById("respuesta");
+div.innerText = msg;
+div.className = tipo;
+div.style.display="block";
 }
-
-iniciarQR();
 
 </script>
 
