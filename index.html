@@ -613,25 +613,33 @@
       
       mostrarBusqueda();
       
-      google.script.run
-        .withSuccessHandler(function(resultado) {
-          if (resultado.encontrado) {
-            employeeData = resultado.datos;
-            mostrarInfoEmpleado(resultado.datos);
-            habilitarBotonRegistro();
-          } else {
-            ocultarInfoEmpleado();
-            mostrarRespuesta("⚠️ " + resultado.mensaje, "warning");
-            deshabilitarBotonRegistro();
-          }
-        })
-        .withFailureHandler(function() {
-          ocultarInfoEmpleado();
-          mostrarRespuesta("❌ Error al buscar empleado", "error");
-          deshabilitarBotonRegistro();
-        })
-        .buscarEmpleado(id);
+      function buscarEmpleado(id) {
+  fetch("TU_URL_APPS_SCRIPT", {
+    method: "POST",
+    body: JSON.stringify({
+      id: id,
+      estado: "CONSULTA"
+    })
+  })
+  .then(res => res.json())
+  .then(data => {
+
+    if(data.exito){
+      employeeData = data;
+
+      document.getElementById('employee-info').style.display = 'block';
+      document.getElementById('employee-name').textContent = data.nombre;
+      document.getElementById('employee-area').textContent = data.area;
+      document.getElementById('employee-position').textContent = data.cargo;
+
+      habilitarBotonRegistro();
+    } else {
+      ocultarInfoEmpleado();
+      mostrarRespuesta("❌ No encontrado", "error");
     }
+
+  });
+}
     
     function mostrarBusqueda() {
       const infoDiv = document.getElementById('employee-info');
@@ -673,54 +681,33 @@
       }
     }
     
-    function enviarFormulario(event) {
-      event.preventDefault();
-      
-      const id = document.getElementById("id").value.trim();
-      const estado = document.getElementById("estado").value;
-      
-      if (!id || !employeeData) {
-        mostrarRespuesta("❌ Por favor ingrese un ID válido", "error");
-        return;
-      }
-      
-      const btnSubmit = document.getElementById("btn-submit");
-      btnSubmit.innerHTML = '<div class="loading"></div> Registrando...';
-      btnSubmit.disabled = true;
-      
-      const data = { 
-        id: id,
-        nombre: employeeData.nombre,
-        area: employeeData.area,
-        cargo: employeeData.cargo,
-        estado: estado 
-      };
-      
-      google.script.run
-        .withSuccessHandler(function(resultado) {
-          btnSubmit.innerHTML = '✅ Registrar Asistencia';
-          
-          if (resultado.exito) {
-            const mensaje = `✅ ${estado} registrado para ${employeeData.nombre} a las ${resultado.hora}`;
-            mostrarRespuesta(mensaje, "success");
-            
-            document.getElementById("formulario").reset();
-            document.getElementById("estado").value = "INGRESO";
-            ocultarInfoEmpleado();
-            deshabilitarBotonRegistro();
-            
-          } else {
-            mostrarRespuesta(resultado.mensaje, "warning");
-            habilitarBotonRegistro();
-          }
-        })
-        .withFailureHandler(function() {
-          btnSubmit.innerHTML = '✅ Registrar Asistencia';
-          habilitarBotonRegistro();
-          mostrarRespuesta("❌ Error de conexión", "error");
-        })
-        .registrarAsistencia(data);
+function enviarFormulario(event) {
+  event.preventDefault();
+
+  const id = document.getElementById("id").value;
+  const estado = document.getElementById("estado").value;
+
+  fetch("TU_URL_APPS_SCRIPT", {
+    method: "POST",
+    body: JSON.stringify({
+      id: id,
+      estado: estado
+    })
+  })
+  .then(res => res.json())
+  .then(data => {
+
+    if(data.exito){
+      mostrarRespuesta(
+        `✅ ${data.nombre} - ${data.hora}`,
+        "success"
+      );
+    } else {
+      mostrarRespuesta(data.mensaje, "error");
     }
+
+  });
+}
     
     document.getElementById("formulario").addEventListener("submit", enviarFormulario);
     
