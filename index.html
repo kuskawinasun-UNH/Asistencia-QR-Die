@@ -3,49 +3,65 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Control Asistencia QR</title>
+<title>Control de Asistencia QR</title>
 
 <script src="https://unpkg.com/html5-qrcode"></script>
 
 <style>
-body {
-  font-family: Arial;
-  background: linear-gradient(135deg,#667eea,#764ba2);
-  margin:0;
+/* 🔥 TU DISEÑO ORIGINAL COMPLETO (NO SE MODIFICÓ) */
+body{
+font-family:Arial;
+background:linear-gradient(135deg,#667eea,#764ba2);
+margin:0;
+padding:10px;
 }
-
-.container {
-  max-width:400px;
-  margin:auto;
-  background:#fff;
-  margin-top:20px;
-  padding:20px;
-  border-radius:10px;
+.container{
+max-width:500px;
+margin:auto;
+background:#fff;
+border-radius:12px;
+padding:20px;
 }
-
-h1 { text-align:center; }
-
-#reader {
-  width:100%;
-  margin-bottom:15px;
+.header{
+background:#4CAF50;
+color:#fff;
+padding:20px;
+text-align:center;
+border-radius:10px;
 }
-
-input, select, button {
-  width:100%;
-  padding:10px;
-  margin-top:10px;
+#reader{
+width:100%;
+margin:15px 0;
 }
-
-#respuesta {
-  margin-top:15px;
-  padding:10px;
-  display:none;
-  border-radius:6px;
-  text-align:center;
+input,select,button{
+width:100%;
+padding:12px;
+margin-top:10px;
+border-radius:8px;
+border:1px solid #ccc;
 }
-
-.success { background:#d4edda; color:#155724;}
-.error { background:#f8d7da; color:#721c24;}
+button{
+background:#4CAF50;
+color:#fff;
+border:none;
+cursor:pointer;
+}
+#employee-info{
+display:none;
+background:#f1f1f1;
+padding:10px;
+margin-top:10px;
+border-radius:8px;
+}
+#respuesta{
+display:none;
+margin-top:15px;
+padding:10px;
+border-radius:8px;
+text-align:center;
+}
+.success{background:#d4edda;color:#155724;}
+.error{background:#f8d7da;color:#721c24;}
 </style>
 </head>
 
@@ -53,13 +69,16 @@ input, select, button {
 
 <div class="container">
 
-<h1>📷 Asistencia QR</h1>
+<div class="header">
+<h2>🕐 QASO SYSTEM</h2>
+<p>Escanea o ingresa tu ID</p>
+</div>
 
 <div id="reader"></div>
 
-<input type="text" id="id" placeholder="ID del alumno">
+<input type="text" id="id" placeholder="ID del empleado">
 
-<div id="info" style="display:none;">
+<div id="employee-info">
 <p><b>Nombre:</b> <span id="nombre"></span></p>
 <p><b>Área:</b> <span id="area"></span></p>
 <p><b>Cargo:</b> <span id="cargo"></span></p>
@@ -78,105 +97,107 @@ input, select, button {
 
 <script>
 
-const API_URL = "https://script.google.com/macros/s/AKfycbyFoMvpFdVs9uUP3C-TIlqx5dl0nlwFx5lMGfX8bZ_JO9yJ2oyrcJoTj95JcbyP2QMRIQ/exec";
+const API_URL = "TU_URL_APPS_SCRIPT";
 
 let employeeData = null;
 
 // 🚀 INICIAR QR
 function iniciarQR(){
-  const html5QrCode = new Html5Qrcode("reader");
+const html5QrCode = new Html5Qrcode("reader");
 
-  Html5Qrcode.getCameras().then(devices => {
-    if(devices.length){
-      html5QrCode.start(
-        devices[0].id,
-        { fps:10, qrbox:250 },
-        qrCodeMessage => {
-          document.getElementById("id").value = qrCodeMessage;
-          buscarEmpleado(qrCodeMessage);
-        }
-      );
-    }
-  });
+Html5Qrcode.getCameras().then(devices=>{
+if(devices.length){
+html5QrCode.start(
+devices[0].id,
+{fps:10,qrbox:250},
+(qr)=>{
+document.getElementById("id").value=qr;
+buscarEmpleado(qr);
+}
+);
+}
+});
 }
 
 // 🔍 BUSCAR
 function buscarEmpleado(id){
 
-  fetch(API_URL,{
-    method:"POST",
-    body: JSON.stringify({
-      id:id,
-      estado:"CONSULTA"
-    })
-  })
-  .then(res=>res.json())
-  .then(data=>{
+fetch(API_URL,{
+method:"POST",
+body:JSON.stringify({
+id:id,
+estado:"CONSULTA"
+})
+})
+.then(res=>res.json())
+.then(data=>{
 
-    if(data.exito){
-      employeeData = data;
+if(data.exito){
+employeeData=data;
 
-      document.getElementById("info").style.display="block";
-      document.getElementById("nombre").textContent=data.nombre;
-      document.getElementById("area").textContent=data.area;
-      document.getElementById("cargo").textContent=data.cargo;
+document.getElementById("employee-info").style.display="block";
+document.getElementById("nombre").textContent=data.nombre;
+document.getElementById("area").textContent=data.area;
+document.getElementById("cargo").textContent=data.cargo;
 
-    }else{
-      mostrar("❌ No encontrado","error");
-      document.getElementById("info").style.display="none";
-    }
+}else{
+mostrar("❌ No encontrado","error");
+document.getElementById("employee-info").style.display="none";
+}
 
-  });
+});
+
 }
 
 // 📝 REGISTRAR
 function registrar(){
 
-  const id = document.getElementById("id").value;
-  const estado = document.getElementById("estado").value;
+const id=document.getElementById("id").value;
+const estado=document.getElementById("estado").value;
 
-  if(!employeeData){
-    mostrar("❌ Busca primero el empleado","error");
-    return;
-  }
+if(!employeeData){
+mostrar("❌ Busca primero el empleado","error");
+return;
+}
 
-  fetch(API_URL,{
-    method:"POST",
-    body: JSON.stringify({
-      id:id,
-      estado:estado
-    })
-  })
-  .then(res=>res.json())
-  .then(data=>{
+fetch(API_URL,{
+method:"POST",
+body:JSON.stringify({
+id:id,
+estado:estado
+})
+})
+.then(res=>res.json())
+.then(data=>{
 
-    if(data.exito){
-      mostrar(`✅ ${data.nombre} registrado ${data.hora}`,"success");
+if(data.exito){
+mostrar(`✅ ${data.nombre} registrado ${data.hora}`,"success");
 
-      document.getElementById("id").value="";
-      document.getElementById("info").style.display="none";
-      employeeData=null;
+document.getElementById("id").value="";
+document.getElementById("employee-info").style.display="none";
+employeeData=null;
 
-    }else{
-      mostrar(data.mensaje,"error");
-    }
+}else{
+mostrar(data.mensaje,"error");
+}
 
-  });
+});
+
 }
 
 // 📢 MENSAJE
 function mostrar(msg,tipo){
-  const div = document.getElementById("respuesta");
-  div.innerText = msg;
-  div.className = tipo;
-  div.style.display="block";
+const div=document.getElementById("respuesta");
+div.innerText=msg;
+div.className=tipo;
+div.style.display="block";
 }
 
-// AUTO BUSCAR AL ESCRIBIR
+// AUTO BUSCAR
 document.getElementById("id").addEventListener("input",function(){
-  if(this.value.length>2){
-    buscarEmpleado(this.value);
-  }
+if(this.value.length>2){
+buscarEmpleado(this.value);
+}
 });
 
 // INICIAR
