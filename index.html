@@ -8,15 +8,11 @@
 <script src="https://unpkg.com/html5-qrcode"></script>
 
 <style>
-
 body{
 margin:0;
 font-family:Arial;
-background-image:url('./unh-fondo.jpg');
+background:url('fondo.jpg') no-repeat center center fixed;
 background-size:cover;
-background-position:center;
-background-repeat:no-repeat;
-min-height:100vh;
 }
 
 .header{
@@ -74,16 +70,15 @@ text-align:center;
 
 .success{background:#d4edda;color:#155724;}
 .error{background:#f8d7da;color:#721c24;}
-
 </style>
 </head>
 
 <body>
 
 <div class="header">
-<img src="logo.png">
-<h3>REGISTRO DE ASISTENICA</h3>
-<img src="logo-unh.png">
+<img src="logo1.png">
+<h3>QASO SYSTEM</h3>
+<img src="logo2.png">
 </div>
 
 <div class="container">
@@ -109,7 +104,7 @@ text-align:center;
 <option value="SALIDA">SALIDA</option>
 </select>
 
-<button onclick="registrar()">Registrar</button>
+<button id="btnRegistrar" onclick="registrar()">Registrar</button>
 
 <div id="respuesta"></div>
 
@@ -117,19 +112,19 @@ text-align:center;
 
 <script>
 
-const API_URL = "https://script.google.com/macros/s/AKfycbxaCInZHVKDP9k2xZFJQAwS33Xd9tWzDUgokiekMAcoT-6Wc7uIYp0KmHEteLtlE7RilQ/exec";
+const API_URL="TU_URL_APPS_SCRIPT";
 
-let employeeData = null;
-let scanner = null;
+let employeeData=null;
+let scanner=null;
+let yaRegistrado=false;
 
 // QR
 function iniciarQR(){
-scanner = new Html5Qrcode("reader");
-
+scanner=new Html5Qrcode("reader");
 Html5Qrcode.getCameras().then(devices=>{
 if(devices.length){
 scanner.start(devices[0].id,{fps:10,qrbox:250},qr=>{
-document.getElementById("idInput").value = qr;
+idInput.value=qr;
 buscar(qr);
 });
 }
@@ -140,27 +135,20 @@ function detenerQR(){
 if(scanner) scanner.stop().catch(()=>{});
 }
 
-// toggle
-document.getElementById("toggleCam").addEventListener("change",function(){
-if(this.checked){
-iniciarQR();
-}else{
-detenerQR();
-document.getElementById("reader").innerHTML="";
-}
+toggleCam.addEventListener("change",function(){
+this.checked ? iniciarQR() : detenerQR();
 });
 
-// 🔍 BUSCAR SOLO CON BOTÓN
+// BUSCAR
 function buscarManual(){
-const id = document.getElementById("idInput").value.trim();
-if(!id){
-mostrar("Ingrese ID","error");
-return;
-}
+const id=idInput.value.trim();
+if(!id) return mostrar("Ingrese ID","error");
 buscar(id);
 }
 
 function buscar(id){
+yaRegistrado=false;
+
 fetch(API_URL,{
 method:"POST",
 body:JSON.stringify({id:id,estado:"CONSULTA"})
@@ -168,53 +156,55 @@ body:JSON.stringify({id:id,estado:"CONSULTA"})
 .then(r=>r.json())
 .then(d=>{
 if(d.exito){
-employeeData = d;
-
-document.getElementById("employee-info").style.display="block";
-document.getElementById("nombre").textContent=d.nombre;
-document.getElementById("area").textContent=d.area;
-document.getElementById("cargo").textContent=d.cargo;
-
+employeeData=d;
+employee-info.style.display="block";
+nombre.textContent=d.nombre;
+area.textContent=d.area;
+cargo.textContent=d.cargo;
 }else{
 mostrar(d.mensaje,"error");
-document.getElementById("employee-info").style.display="none";
 }
 });
 }
 
-// registrar
+// REGISTRAR
 function registrar(){
+
+if(yaRegistrado){
+mostrar("⚠️ Ya registraste este ID","error");
+return;
+}
+
 if(!employeeData){
-mostrar("Primero busca empleado","error");
+mostrar("Busca primero","error");
 return;
 }
 
 fetch(API_URL,{
 method:"POST",
 body:JSON.stringify({
-id:document.getElementById("idInput").value,
-estado:document.getElementById("estado").value
+id:idInput.value,
+estado:estado.value
 })
 })
 .then(r=>r.json())
 .then(d=>{
 if(d.exito){
 mostrar(`✅ ${d.nombre} - ${d.hora}`,"success");
-employeeData=null;
-document.getElementById("employee-info").style.display="none";
-document.getElementById("idInput").value="";
+
+yaRegistrado=true; // 🔒 BLOQUEO FRONT
+
 }else{
 mostrar(d.mensaje,"error");
 }
 });
 }
 
-// mensajes
+// MENSAJE
 function mostrar(msg,tipo){
-const div=document.getElementById("respuesta");
-div.innerText=msg;
-div.className=tipo;
-div.style.display="block";
+respuesta.innerText=msg;
+respuesta.className=tipo;
+respuesta.style.display="block";
 }
 
 iniciarQR();
