@@ -3,105 +3,113 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-<title>Asistencia QR</title>
+<title>Registro de AsistenciaR</title>
 
 <script src="https://unpkg.com/html5-qrcode"></script>
 
 <style>
-
 body{
-margin:0;
-font-family:Arial;
-background:url('unh-fondo.jpg') no-repeat center center fixed;
-background-size:cover;
+  margin:0;
+  font-family:Arial;
+  background:url('unh-fondojpg') no-repeat center center fixed;
+  background-size:cover;
 }
 
 .header{
-background:#78b8e5;
-color:white;
-padding:15px;
-display:flex;
-justify-content:space-between;
-align-items:center;
+  background:#78b8e5;
+  color:white;
+  padding:15px;
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
 }
 
-.header img{height:50px;}
+.header img{
+  height:50px;
+}
 
 .container{
-max-width:420px;
-margin:auto;
-background:rgba(255,255,255,0.95);
-margin-top:20px;
-padding:20px;
-border-radius:12px;
+  max-width:420px;
+  margin:auto;
+  background:rgba(255,255,255,0.95);
+  margin-top:20px;
+  padding:20px;
+  border-radius:12px;
 }
 
-#reader{width:100%;margin:10px 0;}
+#reader{
+  width:100%;
+  margin:10px 0;
+}
 
 input,select,button{
-width:100%;
-padding:12px;
-margin-top:10px;
-border-radius:8px;
-border:1px solid #ccc;
+  width:100%;
+  padding:12px;
+  margin-top:10px;
+  border-radius:8px;
+  border:1px solid #ccc;
 }
 
 button{
-background:#78b8e5;
-color:white;
-border:none;
-font-weight:bold;
+  background:#78b8e5;
+  color:white;
+  border:none;
+  font-weight:bold;
 }
 
 #employee-info{
-display:none;
-background:#eef6fb;
-padding:10px;
-border-radius:8px;
+  display:none;
+  background:#eef6fb;
+  padding:10px;
+  border-radius:8px;
 }
 
 #respuesta{
-display:none;
-margin-top:10px;
-padding:10px;
-border-radius:8px;
-text-align:center;
+  display:none;
+  margin-top:10px;
+  padding:10px;
+  border-radius:8px;
+  text-align:center;
 }
 
 .success{background:#d4edda;color:#155724;}
 .error{background:#f8d7da;color:#721c24;}
 
+.toggle{
+  margin-bottom:10px;
+}
 </style>
 </head>
 
 <body>
 
 <div class="header">
-<img src="logo.png">
-<h3>QASO SYSTEM</h3>
-<img src="logo-unh.png">
+  <img src="logo.png">
+  <h3>QASO SYSTEM</h3>
+  <img src="logo-unh.png">
 </div>
 
 <div class="container">
 
-<label>
-<input type="checkbox" id="toggleCam" checked> Cámara activa
-</label>
+<div class="toggle">
+  <label>
+    <input type="checkbox" id="toggleCam" checked> Cámara activa
+  </label>
+</div>
 
 <div id="reader"></div>
 
-<input type="text" id="id" placeholder="ID">
+<input type="text" id="idInput" placeholder="ID">
 
 <div id="employee-info">
-<p><b>Nombre:</b> <span id="nombre"></span></p>
-<p><b>Área:</b> <span id="area"></span></p>
-<p><b>Cargo:</b> <span id="cargo"></span></p>
+  <p><b>Nombre:</b> <span id="nombre"></span></p>
+  <p><b>Área:</b> <span id="area"></span></p>
+  <p><b>Cargo:</b> <span id="cargo"></span></p>
 </div>
 
 <select id="estado">
-<option value="INGRESO">INGRESO</option>
-<option value="SALIDA">SALIDA</option>
+  <option value="INGRESO">INGRESO</option>
+  <option value="SALIDA">SALIDA</option>
 </select>
 
 <button onclick="registrar()">Registrar</button>
@@ -112,91 +120,131 @@ text-align:center;
 
 <script>
 
-const API_URL="https://script.google.com/macros/s/AKfycbxaCInZHVKDP9k2xZFJQAwS33Xd9tWzDUgokiekMAcoT-6Wc7uIYp0KmHEteLtlE7RilQ/exec";
+const API_URL = "https://script.google.com/macros/s/AKfycbxaCInZHVKDP9k2xZFJQAwS33Xd9tWzDUgokiekMAcoT-6Wc7uIYp0KmHEteLtlE7RilQ/exec";
 
-let employeeData=null;
-let scanner=null;
+let employeeData = null;
+let scanner = null;
 
-// QR
+// 🔵 INICIAR QR
 function iniciarQR(){
-scanner=new Html5Qrcode("reader");
-Html5Qrcode.getCameras().then(devices=>{
-if(devices.length){
-scanner.start(devices[0].id,{fps:10,qrbox:250},qr=>{
-id.value=qr;
-buscar(qr);
-});
-}
-});
+  scanner = new Html5Qrcode("reader");
+
+  Html5Qrcode.getCameras().then(devices=>{
+    if(devices.length){
+      scanner.start(
+        devices[0].id,
+        { fps:10, qrbox:250 },
+        (qr)=>{
+          document.getElementById("idInput").value = qr;
+          buscar(qr);
+        }
+      );
+    }
+  });
 }
 
+// 🔴 DETENER QR
 function detenerQR(){
-if(scanner) scanner.stop();
+  if(scanner){
+    scanner.stop().catch(()=>{});
+  }
 }
 
-// toggle cámara
-toggleCam.addEventListener("change",function(){
-this.checked ? iniciarQR() : detenerQR();
+// 🔁 TOGGLE CAMARA
+document.getElementById("toggleCam").addEventListener("change", function(){
+  if(this.checked){
+    iniciarQR();
+  } else {
+    detenerQR();
+    document.getElementById("reader").innerHTML = "";
+  }
 });
 
-// buscar
-function buscar(idv){
-fetch(API_URL,{
-method:"POST",
-body:JSON.stringify({id:idv,estado:"CONSULTA"})
-})
-.then(r=>r.json())
-.then(d=>{
-if(d.exito){
-employeeData=d;
-employee-info.style.display="block";
-nombre.textContent=d.nombre;
-area.textContent=d.area;
-cargo.textContent=d.cargo;
-}else{
-mostrar("No encontrado","error");
-}
-});
+// 🔍 BUSCAR
+function buscar(id){
+  fetch(API_URL,{
+    method:"POST",
+    body: JSON.stringify({
+      id:id,
+      estado:"CONSULTA"
+    })
+  })
+  .then(res=>res.json())
+  .then(data=>{
+
+    if(data.exito){
+      employeeData = data;
+
+      document.getElementById("employee-info").style.display = "block";
+      document.getElementById("nombre").textContent = data.nombre;
+      document.getElementById("area").textContent = data.area;
+      document.getElementById("cargo").textContent = data.cargo;
+
+    } else {
+      mostrar("❌ No encontrado","error");
+      document.getElementById("employee-info").style.display = "none";
+    }
+
+  })
+  .catch(()=>{
+    mostrar("❌ Error conexión","error");
+  });
 }
 
-// registrar
+// 📝 REGISTRAR
 function registrar(){
-if(!employeeData){
-mostrar("Busca primero","error");
-return;
+
+  const id = document.getElementById("idInput").value;
+  const estado = document.getElementById("estado").value;
+
+  if(!employeeData){
+    mostrar("❌ Busca primero","error");
+    return;
+  }
+
+  fetch(API_URL,{
+    method:"POST",
+    body: JSON.stringify({
+      id:id,
+      estado:estado
+    })
+  })
+  .then(res=>res.json())
+  .then(data=>{
+
+    if(data.exito){
+      mostrar(`✅ ${data.nombre} - ${data.hora}`,"success");
+
+      document.getElementById("idInput").value = "";
+      document.getElementById("employee-info").style.display = "none";
+      employeeData = null;
+
+    } else {
+      mostrar(data.mensaje,"error");
+    }
+
+  })
+  .catch(()=>{
+    mostrar("❌ Error conexión","error");
+  });
 }
 
-fetch(API_URL,{
-method:"POST",
-body:JSON.stringify({
-id:id.value,
-estado:estado.value
-})
-})
-.then(r=>r.json())
-.then(d=>{
-if(d.exito){
-mostrar(`✅ ${d.nombre} - ${d.hora}`,"success");
-employeeData=null;
-employee-info.style.display="none";
-id.value="";
-}else{
-mostrar(d.mensaje,"error");
+// 📢 MENSAJE
+function mostrar(msg,tipo){
+  const div = document.getElementById("respuesta");
+  div.innerText = msg;
+  div.className = tipo;
+  div.style.display = "block";
 }
+
+// 🔎 AUTO BUSCAR
+document.getElementById("idInput").addEventListener("input",function(){
+  if(this.value.length > 2){
+    buscar(this.value);
+  }
 });
-}
 
-// mensaje
-function mostrar(m,t){
-respuesta.innerText=m;
-respuesta.className=t;
-respuesta.style.display="block";
-}
-
-id.addEventListener("input",function(){
-if(this.value.length>2) buscar(this.value);
-});
-
+// 🚀 INICIO
 iniciarQR();
 
 </script>
