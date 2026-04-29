@@ -10,8 +10,7 @@
  * origen | unidad | cxc | area | proceso | tarifa | monto | requisitos | correo | celular
  */
 
-const SHEET_CSV_URL =
-  "https://docs.google.com/spreadsheets/d/e/2PACX-1vQ9zCIn-z3eqQvCZQ529J888MMd084OsBFbyf_qzctbNS_t0JUvJdfJkXtKAIbYZrlVrydPIYaqdugN/pub?output=csv";
+const API_URL = "https://script.google.com/macros/s/AKfycbxaCInZHVKDP9k2xZFJQAwS33Xd9tWzDUgokiekMAcoT-6Wc7uIYp0KmHEteLtlE7RilQ/exec";
 
 /**
  * Configuración general del widget
