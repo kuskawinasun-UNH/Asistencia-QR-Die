@@ -435,7 +435,8 @@
     let selectedCameraId = null;
     let ultimoRegistro = {};
     let cameraEnabled = true;
-    
+
+    const API_URL = "https://script.google.com/macros/s/AKfycbygKAyfhlSsJ878flQEdhfxS7M4Mgx8GHIFdnErn_a4gMGrgNPgfIKVkFMcJ1tvKvjK/exec";
     function actualizarReloj() {
       const ahora = new Date();
       const hora = ahora.toLocaleTimeString('es-PE', {
@@ -613,22 +614,24 @@
       
       mostrarBusqueda();
       
-      google.script.run
-        .withSuccessHandler(function(resultado) {
-          if (resultado.encontrado) {
-            employeeData = resultado.datos;
-            mostrarInfoEmpleado(resultado.datos);
-            habilitarBotonRegistro();
-          } else {
-            ocultarInfoEmpleado();
-            mostrarRespuesta("⚠️ " + resultado.mensaje, "warning");
-            deshabilitarBotonRegistro();
-          }
-        })
-        .withFailureHandler(function() {
-          ocultarInfoEmpleado();
-          mostrarRespuesta("❌ Error al buscar empleado", "error");
-          deshabilitarBotonRegistro();
+fetch(`${API_URL}?accion=buscar&id=${id}`)
+  .then(res => res.json())
+  .then(function(resultado) {
+    if (resultado.encontrado) {
+      employeeData = resultado.datos;
+      mostrarInfoEmpleado(resultado.datos);
+      habilitarBotonRegistro();
+    } else {
+      ocultarInfoEmpleado();
+      mostrarRespuesta("⚠️ " + resultado.mensaje, "warning");
+      deshabilitarBotonRegistro();
+    }
+  })
+  .catch(function() {
+    ocultarInfoEmpleado();
+    mostrarRespuesta("❌ Error al buscar empleado", "error");
+    deshabilitarBotonRegistro();
+  
         })
         .buscarEmpleado(id);
     }
@@ -696,28 +699,36 @@
         estado: estado 
       };
       
-      google.script.run
-        .withSuccessHandler(function(resultado) {
-          btnSubmit.innerHTML = '✅ Registrar Asistencia';
-          
-          if (resultado.exito) {
-            const mensaje = `✅ ${estado} registrado para ${employeeData.nombre} a las ${resultado.hora}`;
-            mostrarRespuesta(mensaje, "success");
-            
-            document.getElementById("formulario").reset();
-            document.getElementById("estado").value = "INGRESO";
-            ocultarInfoEmpleado();
-            deshabilitarBotonRegistro();
-            
-          } else {
-            mostrarRespuesta(resultado.mensaje, "warning");
-            habilitarBotonRegistro();
-          }
-        })
-        .withFailureHandler(function() {
-          btnSubmit.innerHTML = '✅ Registrar Asistencia';
-          habilitarBotonRegistro();
-          mostrarRespuesta("❌ Error de conexión", "error");
+fetch(API_URL, {
+  method: "POST",
+  body: JSON.stringify({
+    accion: "registrar",
+    ...data
+  })
+})
+.then(res => res.json())
+.then(function(resultado) {
+
+  btnSubmit.innerHTML = '✅ Registrar Asistencia';
+
+  if (resultado.exito) {
+    const mensaje = `✅ ${estado} registrado para ${employeeData.nombre} a las ${resultado.hora}`;
+    mostrarRespuesta(mensaje, "success");
+
+    document.getElementById("formulario").reset();
+    document.getElementById("estado").value = "INGRESO";
+    ocultarInfoEmpleado();
+    deshabilitarBotonRegistro();
+
+  } else {
+    mostrarRespuesta(resultado.mensaje, "warning");
+    habilitarBotonRegistro();
+  }
+})
+.catch(function() {
+  btnSubmit.innerHTML = '✅ Registrar Asistencia';
+  habilitarBotonRegistro();
+  mostrarRespuesta("❌ Error de conexión", "error");
         })
         .registrarAsistencia(data);
     }
