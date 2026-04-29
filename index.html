@@ -5,9 +5,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Control de Asistencia QR</title>
   <script src="https://unpkg.com/html5-qrcode"></script>
-
   <style>
-    /* 🔥 TODO TU DISEÑO ORIGINAL SIN CAMBIOS */
+    /* 🔥 TODO TU CSS ORIGINAL SIN CAMBIOS */
     :root {
       --primary: #4CAF50;
       --primary-dark: #45a049;
@@ -25,7 +24,7 @@
       --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     }
 
-    * { box-sizing: border-box; margin:0; padding:0; }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
 
     body {
       font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
@@ -35,11 +34,12 @@
     }
 
     .container {
-      max-width: 500px;
+      max-width: min(500px, 100vw - 20px);
       margin: 0 auto;
       background: white;
       border-radius: var(--border-radius);
       box-shadow: var(--shadow);
+      overflow: hidden;
     }
 
     .header {
@@ -51,72 +51,70 @@
 
     .content { padding: 20px; }
 
-    #reader { width:100%; margin-bottom:20px; }
-
-    input, select {
-      width:100%;
-      padding:10px;
-      margin-bottom:10px;
+    #reader {
+      width: 100%;
+      max-width: 300px;
+      margin: 0 auto 20px;
+      display: none;
     }
 
-    button {
-      width:100%;
-      padding:12px;
-      background:var(--primary);
-      color:white;
-      border:none;
-      cursor:pointer;
+    .btn {
+      width: 100%;
+      padding: 12px;
+      background: var(--primary);
+      color: white;
+      border: none;
+      cursor: pointer;
     }
 
-    #respuesta { margin-top:10px; text-align:center; }
+    #respuesta { margin-top: 20px; text-align: center; }
   </style>
 </head>
 
 <body>
-
 <div class="container">
+  <div class="header">
+    <h1>🕐 REGISTRITO DE ASISTENCIA KUSKA WIÑASUN</h1>
+    <p>Escanea tu código QR o ingresa tu ID</p>
+  </div>
 
-<div class="header">
-  <h1>🕐 REGISTRO DE ASISTENCIA DIE</h1>
-  <p>Escanea tu código QR o ingresa tu ID</p>
-</div>
+  <div class="content">
 
-<div class="content">
+    <div id="reader"></div>
 
-<div id="reader"></div>
+    <input type="text" id="id" placeholder="Ingrese su ID">
 
-<input type="text" id="id" placeholder="Ingrese ID">
+    <div id="employee-info" style="display:none;">
+      <p id="employee-name"></p>
+      <p id="employee-area"></p>
+      <p id="employee-position"></p>
+    </div>
 
-<div id="employee-info" style="display:none;">
-  <p id="employee-name"></p>
-  <p id="employee-area"></p>
-  <p id="employee-position"></p>
-</div>
+    <select id="estado">
+      <option value="INGRESO">INGRESO</option>
+      <option value="SALIDA">SALIDA</option>
+    </select>
 
-<select id="estado">
-  <option value="INGRESO">INGRESO</option>
-  <option value="SALIDA">SALIDA</option>
-</select>
+    <button class="btn" id="btn-submit">Registrar</button>
 
-<button id="btn-submit">Registrar</button>
+    <div id="respuesta"></div>
 
-<div id="respuesta"></div>
-
-</div>
+  </div>
 </div>
 
 <script>
 
-// 🔴 TU URL DE APPS SCRIPT
+// 🔴 TU URL
 const API_URL = "https://script.google.com/macros/s/AKfycbygKAyfhlSsJ878flQEdhfxS7M4Mgx8GHIFdnErn_a4gMGrgNPgfIKVkFMcJ1tvKvjK/exec";
 
 let employeeData = null;
+let qrCodeReader = null;
 
 // ---------------- QR
 function iniciarQR(){
-  const qr = new Html5Qrcode("reader");
+  qrCodeReader = new Html5Qrcode("reader");
 
-  qr.start(
+  qrCodeReader.start(
     { facingMode: "environment" },
     { fps:10, qrbox:250 },
     (text)=>{
@@ -124,67 +122,76 @@ function iniciarQR(){
       buscarEmpleado(text);
     }
   );
+
+  document.getElementById("reader").style.display = "block";
 }
 
 iniciarQR();
 
-// ---------------- BUSCAR EMPLEADO
-async function buscarEmpleado(id){
+// ---------------- BUSCAR
+function buscarEmpleado(id){
 
-  if(!id.trim()) return;
+  if (!id.trim()) return;
 
-  const res = await fetch(`${API_URL}?accion=buscar&id=${id}`);
-  const resultado = await res.json();
+  fetch(`${API_URL}?accion=buscar&id=${id}`)
+    .then(res => res.json())
+    .then(function(resultado) {
+      if (resultado.encontrado) {
+        employeeData = resultado.datos;
 
-  if (resultado.encontrado) {
-    employeeData = resultado.datos;
+        document.getElementById('employee-info').style.display = 'block';
+        document.getElementById('employee-name').textContent = resultado.datos.nombre;
+        document.getElementById('employee-area').textContent = resultado.datos.area;
+        document.getElementById('employee-position').textContent = resultado.datos.cargo;
 
-    document.getElementById('employee-info').style.display = 'block';
-    document.getElementById('employee-name').textContent = resultado.datos.nombre;
-    document.getElementById('employee-area').textContent = resultado.datos.area;
-    document.getElementById('employee-position').textContent = resultado.datos.cargo;
-
-  } else {
-    employeeData = null;
-    document.getElementById('employee-info').style.display = 'none';
-    mostrarRespuesta("Empleado no encontrado", "orange");
-  }
+      } else {
+        employeeData = null;
+        document.getElementById('employee-info').style.display = 'none';
+        mostrarRespuesta("Empleado no encontrado", "orange");
+      }
+    })
+    .catch(() => {
+      mostrarRespuesta("Error al buscar", "red");
+    });
 }
 
 // ---------------- REGISTRAR
-async function registrarAsistencia(){
+function registrarAsistencia(){
 
   const id = document.getElementById("id").value;
   const estado = document.getElementById("estado").value;
 
-  if(!employeeData){
+  if (!employeeData) {
     mostrarRespuesta("Ingrese un ID válido", "red");
     return;
   }
 
-  const res = await fetch(API_URL,{
-    method:"POST",
+  fetch(API_URL, {
+    method: "POST",
     body: JSON.stringify({
-      accion:"registrar",
-      id:id,
-      nombre:employeeData.nombre,
-      area:employeeData.area,
-      cargo:employeeData.cargo,
-      estado:estado
+      accion: "registrar",
+      id,
+      nombre: employeeData.nombre,
+      area: employeeData.area,
+      cargo: employeeData.cargo,
+      estado
     })
+  })
+  .then(res => res.json())
+  .then(function(resultado) {
+    if (resultado.exito) {
+      mostrarRespuesta(`✅ ${estado} registrado a las ${resultado.hora}`, "green");
+    } else {
+      mostrarRespuesta(resultado.mensaje, "orange");
+    }
+  })
+  .catch(() => {
+    mostrarRespuesta("Error de conexión", "red");
   });
-
-  const resultado = await res.json();
-
-  if (resultado.exito) {
-    mostrarRespuesta(`✅ ${estado} registrado a las ${resultado.hora}`, "green");
-  } else {
-    mostrarRespuesta(resultado.mensaje, "orange");
-  }
 }
 
 // ---------------- UI
-function mostrarRespuesta(msg,color){
+function mostrarRespuesta(msg, color){
   const r = document.getElementById("respuesta");
   r.innerText = msg;
   r.style.color = color;
