@@ -1,3 +1,10 @@
+/* =======================
+   CONFIGURACIÓNN
+======================= */
+
+const CSV_URL =
+  typeof SHEET_CSV_URL !== "undefined" ? SHEET_CSV_URL : "";
+
 const HOJA_ID = '1s-hqY8QRK2KMtvndUWQx3KXFZrxE_uwhKcaXGNA8WdE';
 const NOMBRE_HOJA_DATOS = 'datos';
 const NOMBRE_HOJA_BASE = 'base';
