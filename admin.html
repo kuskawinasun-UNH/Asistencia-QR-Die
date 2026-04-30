@@ -52,7 +52,7 @@ function guardar() {
       alert("✅ Guardado");
       cargar();
     } else {
-      alert("❌ " + res.mensaje);
+      alert("❌ " + JSON.stringify(res));
     }
   });
 }
