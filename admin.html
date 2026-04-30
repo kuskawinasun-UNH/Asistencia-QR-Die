@@ -3,88 +3,61 @@
 <head>
   <meta charset="UTF-8">
   <title>Panel Admin</title>
-  <style>
-    body {
-      font-family: Arial;
-      background: #f4f6f9;
-      text-align: center;
-      padding: 40px;
-    }
-
-    .box {
-      background: white;
-      padding: 30px;
-      border-radius: 10px;
-      max-width: 400px;
-      margin: auto;
-      box-shadow: 0 4px 10px rgba(0,0,0,0.1);
-    }
-
-    input {
-      width: 100%;
-      padding: 10px;
-      margin: 10px 0;
-    }
-
-    button {
-      padding: 10px 20px;
-      background: #4CAF50;
-      color: white;
-      border: none;
-      cursor: pointer;
-    }
-
-    button:hover {
-      background: #45a049;
-    }
-  </style>
 </head>
-<body>
+<body style="font-family: Arial; text-align:center; padding:40px;">
 
-<div class="box">
-  <h2>⚙ Panel Administrador</h2>
+<h2>⚙ Panel Admin</h2>
 
-  <p>Actividad actual:</p>
-  <h3 id="actividad-actual">Cargando...</h3>
+<p>Actividad actual:</p>
+<h3 id="actual">Cargando...</h3>
 
-  <input type="text" id="actividad" placeholder="Nueva actividad">
-
-  <button onclick="guardarActividad()">Guardar</button>
-</div>
+<input type="text" id="actividad" placeholder="Nueva actividad">
+<br><br>
+<button onclick="guardar()">Guardar</button>
 
 <script>
-  // 🔐 PROTECCIÓN
-  const pass = prompt("🔐 Ingresa contraseña:");
+const URL = "https://script.google.com/macros/s/AKfycbygKAyfhlSsJ878flQEdhfxS7M4Mgx8GHIFdnErn_a4gMGrgNPgfIKVkFMcJ1tvKvjK/exec"; // 👈 IMPORTANTE
 
-  if (pass !== "admin123") {
-    alert("❌ Acceso denegado");
-    document.body.innerHTML = "";
-  }
+// 🔐 contraseña simple
+const pass = prompt("🔐 Contraseña:");
+if (pass !== "admin123") {
+  alert("❌ Acceso denegado");
+  document.body.innerHTML = "";
+}
 
-  // 🔄 Cargar actividad actual
-  function cargarActividad() {
-    google.script.run.withSuccessHandler(function(res) {
-      document.getElementById("actividad-actual").innerText = res;
-    }).obtenerActividad();
-  }
+// 📥 obtener actividad
+function cargar() {
+  fetch(URL + "?action=getActividad")
+    .then(r => r.json())
+    .then(data => {
+      document.getElementById("actual").innerText = data.actividad;
+    });
+}
 
-  // 💾 Guardar nueva actividad
-  function guardarActividad() {
-    const nueva = document.getElementById("actividad").value;
+// 💾 guardar actividad
+function guardar() {
+  const actividad = document.getElementById("actividad").value;
 
-    google.script.run
-      .withSuccessHandler(function(res) {
-        if (res.ok) {
-          alert("✅ Guardado correctamente");
-          cargarActividad();
-        } else {
-          alert("❌ " + res.mensaje);
-        }
-      })
-      .guardarActividad(nueva, pass);
-  }
+  fetch(URL, {
+    method: "POST",
+    body: JSON.stringify({
+      action: "setActividad",
+      actividad: actividad,
+      clave: pass
+    })
+  })
+  .then(r => r.json())
+  .then(res => {
+    if (res.ok) {
+      alert("✅ Guardado");
+      cargar();
+    } else {
+      alert("❌ " + res.mensaje);
+    }
+  });
+}
 
-  cargarActividad();
+cargar();
 </script>
 
 </body>
