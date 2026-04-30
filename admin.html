@@ -16,7 +16,7 @@
 <button onclick="guardar()">Guardar</button>
 
 <script>
-const URL = "https://script.google.com/macros/s/AKfycbygKAyfhlSsJ878flQEdhfxS7M4Mgx8GHIFdnErn_a4gMGrgNPgfIKVkFMcJ1tvKvjK/exec"; // 👈 IMPORTANTE
+const URL = "https://script.google.com/macros/s/AKfycbygKAyfhlSsJ878flQEdhfxS7M4Mgx8GHIFdnErn_a4gMGrgNPgfIKVkFMcJ1tvKvjK/exec";
 
 // 🔐 contraseña simple
 const pass = prompt("🔐 Contraseña:");
@@ -27,10 +27,10 @@ if (pass !== "admin123") {
 
 // 📥 obtener actividad
 function cargar() {
-  fetch(URL + "?action=getActividad")
+  fetch(URL + "?accion=actividad")
     .then(r => r.json())
     .then(data => {
-      document.getElementById("actual").innerText = data.actividad;
+      document.getElementById("actual").innerText = data.actividad || "Sin actividad";
     });
 }
 
@@ -41,7 +41,7 @@ function guardar() {
   fetch(URL, {
     method: "POST",
     body: JSON.stringify({
-      action: "setActividad",
+      accion: "guardarActividad",
       actividad: actividad,
       clave: pass
     })
